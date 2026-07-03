@@ -3,30 +3,15 @@ Develop a basic crawler for the web search for user defined keywords.
 import requests
 from bs4 import BeautifulSoup
 
-def crawl_web(keyword, max_pages=2):
-    base_url = "https://www.bing.com/search?q= "  # safer to use Bing/Google
-    url = base_url + keyword
-    results = []
+key = input("Enter Keyword: ")
+url = "https://www.bing.com/search?q=" + key
 
-    for page in range(max_pages):
-        response = requests.get(url + f"&first={page*10}")
-        if response.status_code != 200:
-            print("Error fetching page:", response.status_code)
-            continue
+page = requests.get(url)
 
-        soup = BeautifulSoup(response.text, "html.parser")
-
-        # Extract search result links
-        for item in soup.select("li.b_algo h2 a"):
-            title = item.get_text()
-            link = item.get("href")
-            results.append((title, link))
-
-    return results
-
-# Example usage
-if __name__ == "__main__":
-    keyword = input("Enter keyword to search: ")
-    data = crawl_web(keyword)
-    for title, link in data:
-        print(f"{title} -> {link}")
+if page.status_code == 200:
+    soup = BeautifulSoup(page.text, "html.parser")
+    for i in soup.select("li.b_algo h2 a"):
+        print(i.text)
+        print(i["href"])
+else:
+    print("Failed to fetch webpage")

@@ -1,3 +1,5 @@
+Sentiment analysis for reviews by customers and visualize the same.
+
 import pandas as pd
 import matplotlib.pyplot as plt
 from nltk.sentiment import SentimentIntensityAnalyzer

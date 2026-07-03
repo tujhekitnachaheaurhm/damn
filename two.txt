@@ -1,0 +1,14 @@
+# Scrape an online Social Media Site for Data. Use python to scrape information from twitter.
+
+from playwright.sync_api import sync_playwright
+with sync_playwright() as pw:
+    browser = pw.chromium.launch(headless=False)
+    context = browser.new_context(viewport={"width": 1920, "height": 1080})
+    page = context.new_page()
+    page.goto("https://example.com")
+
+    page.locator("h1").wait_for(state="visible")
+
+    tweet_text = page.locator("h1").inner_text()
+    print(tweet_text)
+    browser.close()

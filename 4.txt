@@ -1,30 +1,18 @@
 # Perform Spam Classifier.
 
-import pandas as pd
 from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.model_selection import train_test_split
 from sklearn.naive_bayes import MultinomialNB
 
-url = "https://raw.githubusercontent.com/ShubhamPy/Spam-Classifier/refs/heads/master/spam.tsv "
-df = pd.read_csv(url, sep='\t', header=None, names=['Label', 'Message'])
+msg = ["Win money now", "Hello friend", "Claim your prize", "How are you"]
+label = ["Spam", "Ham", "Spam", "Ham"]
 
-df['Label'] = df['Label'].map({'spam': 1, 'ham': 0})
-
-X = df['Message']
-y = df['Label']
-
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
-
-vectorizer = CountVectorizer()
-X_train_vec = vectorizer.fit_transform(X_train)
-X_test_vec = vectorizer.transform(X_test)
+cv = CountVectorizer()
+x = cv.fit_transform(msg)
 
 model = MultinomialNB()
-model.fit(X_train_vec, y_train)
+model.fit(x, label)
 
-new_messages = ["Claim your free reward now!", "Hello, how are you?"]
-new_vectors = vectorizer.transform(new_messages)
-predictions = model.predict(new_vectors)
+test = "Claim your free reward now!"
+result = model.predict(cv.transform([test]))
 
-for msg, pred in zip(new_messages, predictions):
-    print(f"'{msg}' is {'Spam' if pred == 1 else 'Ham'}") 
+print(test, "is", result[0])

@@ -1,0 +1,44 @@
+# Develop a focused crawler for local search.
+
+import requests
+from bs4 import BeautifulSoup
+
+visited = set()
+
+def focused_crawler(keyword, max_links=10):
+    base_url = "https://en.wikipedia.org/wiki/"
+    start_url = base_url + keyword
+
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                      "AppleWebKit/537.36 (KHTML, like Gecko) "
+                      "Chrome/122.0 Safari/537.36 "
+    }
+
+    try:
+        response = requests.get(start_url, headers=headers)
+        response.raise_for_status()
+    except Exception as e:
+        print(f"Error fetching {start_url}: {e}")
+        return
+
+    soup = BeautifulSoup(response.text, "html.parser")
+    links = soup.find_all("a")
+
+    count = 0
+    for link in links:
+        if "href" in link.attrs:
+            href = link["href"]
+            # Focus filter: only crawl local/geographic pages
+            if href.startswith("/wiki/") and ":" not in href and "India" in href:
+                full_url = "https://en.wikipedia.org" + href
+                if full_url not in visited:
+                    visited.add(full_url)
+                    print(full_url)
+                    count += 1
+                    if count >= max_links:
+                        break
+
+if __name__ == "__main__":
+    keyword = input("Enter a local search keyword (e.g., Vasai): ")
+    focused_crawler(keyword)

@@ -1,0 +1,299 @@
+Practical No. 1
+Sentiment analysis for reviews by customers and visualize the same.
+
+import pandas as pd
+import matplotlib.pyplot as plt
+from nltk.sentiment import SentimentIntensityAnalyzer
+from wordcloud import WordCloud
+import nltk
+
+nltk.download('vader_lexicon')
+sia=SentimentIntensityAnalyzer()
+data=pd.DataFrame({
+    "review":[
+        "The product is amazing! I love it.",
+        "The product meets expectations and performs as described.",
+        "Terrible quality, I'm disappointed."
+    ]})
+
+def get_sentiment(review):
+    score=sia.polarity_scores(review)
+    if score['compound']>0.05:
+        return "Positive"
+    elif score['compound']<-0.05:
+        return "Negative"
+    else:
+        return "Neutral"
+
+data["sentiment"]=data["review"].apply(get_sentiment)
+print(data)
+
+data["sentiment"].value_counts().plot(kind="bar", color=["green", "gray", "red"])
+plt.xlabel("Sentiment")
+plt.ylabel("Count")
+plt.title("Customer Sentiment Analysis")
+plt.show()
+
+text = " ".join(review for review in data["review"])
+wordcloud = WordCloud(background_color="white").generate(text)
+plt.imshow(wordcloud, interpolation="bilinear")
+plt.axis("off")
+plt.show()
+===================================================================================
+Practical No. 2
+Scrape an online Social Media Site for Data. Use python to scrape information from twitter.
+
+from playwright.sync_api import sync_playwright
+with sync_playwright() as pw:
+    browser = pw.chromium.launch(headless=False)
+    context = browser.new_context(viewport={"width": 1920, "height": 1080})
+    page = context.new_page()
+    page.goto("https://example.com")
+
+    page.locator("h1").wait_for(state="visible")
+
+    tweet_text = page.locator("h1").inner_text()
+    print(tweet_text)
+    browser.close()
+
+===================================================================================
+Practical No. 3
+Page Rank for link analysis using python: apply random walk.
+
+import numpy as np
+
+link_matrix = np.array([
+    [1, 1, 1, 1],  
+    [1, 1, 1, 0],  
+    [1, 1, 0, 0],  
+    [1, 0, 0, 0]])
+
+n = link_matrix.shape[0]
+
+stochastic_matrix = link_matrix / link_matrix.sum(axis=1, keepdims=True)
+
+prob = 0.85
+iterations = 100
+tolerance = 1e-6
+
+pagerank = np.ones(n) / n
+
+for i in range(iterations):
+    new_pagerank = ((1 - prob) / n) + prob * np.dot(stochastic_matrix.T, pagerank)
+    if np.linalg.norm(new_pagerank - pagerank, ord=1) < tolerance:
+        break
+    pagerank = new_pagerank
+
+pages = ["page1", "page2", "page3", "page4"]
+for page, rank in zip(pages, pagerank):
+    print(f"{page}: {rank:.4f}")
+===================================================================================
+Practical No. 4
+Perform Spam Classifier.
+
+import pandas as pd
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.model_selection import train_test_split
+from sklearn.naive_bayes import MultinomialNB
+
+url = "https://raw.githubusercontent.com/ShubhamPy/Spam-Classifier/refs/heads/master/spam.tsv "
+df = pd.read_csv(url, sep='\t', header=None, names=['Label', 'Message'])
+
+df['Label'] = df['Label'].map({'spam': 1, 'ham': 0})
+
+X = df['Message']
+y = df['Label']
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+
+vectorizer = CountVectorizer()
+X_train_vec = vectorizer.fit_transform(X_train)
+X_test_vec = vectorizer.transform(X_test)
+
+model = MultinomialNB()
+model.fit(X_train_vec, y_train)
+
+new_messages = ["Claim your free reward now!", "Hello, how are you?"]
+new_vectors = vectorizer.transform(new_messages)
+predictions = model.predict(new_vectors)
+
+for msg, pred in zip(new_messages, predictions):
+    print(f"'{msg}' is {'Spam' if pred == 1 else 'Ham'}") 
+===================================================================================
+Practical No. 5
+Demonstrate Text Mining and Webpage Pre-processing using meta information from the web pages (Local/Online).
+
+from bs4 import BeautifulSoup
+import requests
+import re
+from nltk.tokenize import word_tokenize
+from nltk.corpus import stopwords
+import nltk
+from collections import Counter
+
+# Fetch the webpage
+url = "https://www.geeksforgeeks.org/text-mining-in-data-mining/ "
+response = requests.get(url)
+soup = BeautifulSoup(response.text, "html.parser")
+
+# Extract meta information
+t = soup.title.string
+d = soup.find("meta", attrs={"name": "description"})
+k = soup.find("meta", attrs={"name": "keywords"})
+
+print(" Title:", t)
+print("\n Description:", d["content"] if d else "Not found")
+print("\n Keywords:", k["content"] if k else "Not found")
+
+# Download NLTK data
+nltk.download('stopwords')
+nltk.download('punkt')
+nltk.download('punkt_tab')
+
+# Extract raw text
+raw_text = soup.get_text()
+
+# Cleaning steps
+text = re.sub(r'\s+', ' ', raw_text)  # Remove extra spaces
+text = re.sub(r'[^a-zA-Z]', ' ', text)  # Keep only letters
+tokens = word_tokenize(text.lower())  # Tokenization & lowercasing
+filtered_tokens = [word for word in tokens if word not in stopwords.words("english")]
+print("\n Processed Text:", filtered_tokens[:50])
+
+# Analyze keyword frequency
+keyword_list = k["content"].split(",") if k else []
+word_counts = Counter(keyword_list)
+print("\n Keyword Frequency:", word_counts)
+===================================================================================
+Practical No.6
+Apriori Algorithm implementation in case study.
+
+import pandas as pd
+from mlxtend.frequent_patterns import apriori
+from mlxtend.frequent_patterns import association_rules
+
+data = {
+    'Transaction': [1, 2, 3, 4, 5],
+    'Milk': [1, 0, 1, 1, 0],
+    'Bread': [1, 1, 1, 0, 1],
+    'Butter': [0, 1, 0, 1, 1],
+    'Eggs': [1, 0, 1, 0, 1]
+}
+
+df = pd.DataFrame(data)
+df.set_index('Transaction', inplace=True)
+
+df = df.astype(bool)
+frequent_itemsets = apriori(df, min_support=0.6, use_colnames=True)
+print(frequent_itemsets)
+
+rules = association_rules(frequent_itemsets, metric="lift", min_threshold=1)
+print(rules)
+===================================================================================
+Practical No. 7
+Develop a basic crawler for the web search for user defined keywords.
+
+import requests
+from bs4 import BeautifulSoup
+
+def crawl_web(keyword, max_pages=2):
+    base_url = "https://www.bing.com/search?q= "  # safer to use Bing/Google
+    url = base_url + keyword
+    results = []
+
+    for page in range(max_pages):
+        response = requests.get(url + f"&first={page*10}")
+        if response.status_code != 200:
+            print("Error fetching page:", response.status_code)
+            continue
+
+        soup = BeautifulSoup(response.text, "html.parser")
+
+        # Extract search result links
+        for item in soup.select("li.b_algo h2 a"):
+            title = item.get_text()
+            link = item.get("href")
+            results.append((title, link))
+
+    return results
+
+# Example usage
+if __name__ == "__main__":
+    keyword = input("Enter keyword to search: ")
+    data = crawl_web(keyword)
+    for title, link in data:
+        print(f"{title} -> {link}")
+===================================================================================
+Practical No. 8
+Develop a focused crawler for local search.
+
+import requests
+from bs4 import BeautifulSoup
+
+visited = set()
+
+def focused_crawler(keyword, max_links=10):
+    base_url = "https://en.wikipedia.org/wiki/"
+    start_url = base_url + keyword
+
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                      "AppleWebKit/537.36 (KHTML, like Gecko) "
+                      "Chrome/122.0 Safari/537.36 "
+    }
+
+    try:
+        response = requests.get(start_url, headers=headers)
+        response.raise_for_status()
+    except Exception as e:
+        print(f"Error fetching {start_url}: {e}")
+        return
+
+    soup = BeautifulSoup(response.text, "html.parser")
+    links = soup.find_all("a")
+
+    count = 0
+    for link in links:
+        if "href" in link.attrs:
+            href = link["href"]
+            # Focus filter: only crawl local/geographic pages
+            if href.startswith("/wiki/") and ":" not in href and "India" in href:
+                full_url = "https://en.wikipedia.org" + href
+                if full_url not in visited:
+                    visited.add(full_url)
+                    print(full_url)
+                    count += 1
+                    if count >= max_links:
+                        break
+
+if __name__ == "__main__":
+    keyword = input("Enter a local search keyword (e.g., Vasai): ")
+    focused_crawler(keyword)
+
+===================================================================================
+Practical No. 9
+Develop a programme for deep search implementation to detect plagiarism in documents online.
+
+import requests
+from bs4 import BeautifulSoup
+import spacy
+# python -m spacy download en_core_web_md
+nlp = spacy.load("en_core_web_md")
+
+def get_online_text(url):
+    response = requests.get(url)
+    soup = BeautifulSoup(response.text, 'html.parser')
+    return soup.get_text()
+def check_plagiarism(original_text, online_text):
+    doc1 = nlp(original_text)
+    doc2 = nlp(online_text)
+    similarity = doc1.similarity(doc2)
+    return similarity
+
+#original_text = "Plagiarism refers to the act of using someone else's work, such as words, ideas, or inventions, without giving proper credit or acknowledgment."
+#original_text = "Plagiarism can also include re-using your own work without citation."
+original_text = "Plag POIUYtrewqasddf"
+online_text = get_online_text("https://www.sciencedirect.com/topics/social-sciences/plagiarism")
+similarity_score = check_plagiarism(original_text, online_text)
+
+print(f"Plagiarism Similarity Score: {similarity_score:.2f}")

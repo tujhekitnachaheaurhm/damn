@@ -10,14 +10,9 @@ with sync_playwright() as pw:
     )
 
     page = context.new_page()
-
-    # Open Reddit
     page.goto("https://www.reddit.com/")
-
-    # Wait for the page title (H1) to appear
     page.locator("h1").wait_for(state="visible")
 
-    # Extract the heading text
     heading = page.locator("h1").inner_text()
 
     print("Reddit Heading:", heading)

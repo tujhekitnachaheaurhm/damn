@@ -1,47 +1,22 @@
-# Sentiment analysis for reviews by customers and visualize the same.
+# sentence segmentation and word tokenization
 
-import pandas as pd
-import matplotlib.pyplot as plt
-from nltk.sentiment import SentimentIntensityAnalyzer
-from wordcloud import WordCloud
+import spacy
+# python -m spacy download en_core_web_sm
+nlp=spacy.load("en_core_web_sm")
+
+MyText = "sita is cute and smart. sita likes dogs and cats."
+MyDoc = nlp(MyText)
+print(type(MyDoc))
+
+
+for token in MyDoc:
+  print(token.text)
+
+for sent in MyDoc.sents:
+  print(sent)
+
 import nltk
-
-nltk.download("vader_lexicon")
-
-sia = SentimentIntensityAnalyzer()
-
-reviews = [
-    "The product is amazing! I love it.",
-    "The product meets expectations and performs as described.",
-    "Terrible quality, I'm disappointed."
-]
-
-df = pd.DataFrame({"Review": reviews})
-
-def sentiment(review):
-    score = sia.polarity_scores(review)["compound"]
-
-    if score >= 0.05:
-        return "Positive"
-    elif score <= -0.05:
-        return "Negative"
-    else:
-        return "Neutral"
-
-df["Sentiment"] = df["Review"].apply(sentiment)
-
-print(df)
-
-df["Sentiment"].value_counts().plot(kind="bar",
-                                    color=["green","gray","red"])
-plt.title("Customer Sentiment Analysis")
-plt.xlabel("Sentiment")
-plt.ylabel("Count")
-plt.show()
-
-text = " ".join(df["Review"])
-wordcloud = WordCloud(background_color="white").generate(text)
-
-plt.imshow(wordcloud)
-plt.axis("off")
-plt.show()
+nltk.download('punkt')
+MyText = "sita is cute and smart. she likes cats and dogs. i AM FINDING JOB."
+from nltk.tokenize import sent_tokenize, word_tokenize
+sent_tokenize(MyText)

@@ -1,29 +1,16 @@
-# Page Rank for link analysis using python: apply random walk.
+# Implement a tri-gram model
 
-import numpy as np
+import nltk
+nltk.download('punkt')
 
-link_matrix = np.array([
-    [1, 1, 1, 1],  
-    [1, 1, 1, 0],  
-    [1, 1, 0, 0],  
-    [1, 0, 0, 0]])
+string = "i am your best friend always and forever"
+qt=nltk.word_tokenize(string)
+print(qt)
+print("---------------------------")
 
-n = link_matrix.shape[0]
+qu=list(nltk.bigrams(qt))
+print(qu)
+print("---------------------------")
 
-stochastic_matrix = link_matrix / link_matrix.sum(axis=1, keepdims=True)
-
-prob = 0.85
-iterations = 100
-tolerance = 1e-6
-
-pagerank = np.ones(n) / n
-
-for i in range(iterations):
-    new_pagerank = ((1 - prob) / n) + prob * np.dot(stochastic_matrix.T, pagerank)
-    if np.linalg.norm(new_pagerank - pagerank, ord=1) < tolerance:
-        break
-    pagerank = new_pagerank
-
-pages = ["page1", "page2", "page3", "page4"]
-for page, rank in zip(pages, pagerank):
-    print(f"{page}: {rank:.4f}")
+tri=list(nltk.ngrams(qt,3))
+print(tri)

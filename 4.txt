@@ -1,18 +1,12 @@
-# Perform Spam Classifier.
+# Implement PoS tagging using HMM & Neural Model
 
-from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.naive_bayes import MultinomialNB
+import nltk
+nltk.download('treebank')
+nltk.download('universal_tagset')
 
-msg = ["Win money now", "Hello friend", "Claim your prize", "How are you"]
-label = ["Spam", "Ham", "Spam", "Ham"]
+nltk_data = list(nltk.corpus.treebank.tagged_sents(tagset='universal'))
+print(nltk_data[:2])
 
-cv = CountVectorizer()
-x = cv.fit_transform(msg)
-
-model = MultinomialNB()
-model.fit(x, label)
-
-test = "Claim your free reward now!"
-result = model.predict(cv.transform([test]))
-
-print(test, "is", result[0])
+for sent in nltk_data[:2]:
+  for w in sent:
+    print(w)

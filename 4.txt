@@ -1,12 +1,35 @@
 # Implement PoS tagging using HMM & Neural Model
 
 import nltk
+from nltk.tag import hmm
+
 nltk.download('treebank')
 nltk.download('universal_tagset')
 
-nltk_data = list(nltk.corpus.treebank.tagged_sents(tagset='universal'))
-print(nltk_data[:2])
+data = list(nltk.corpus.treebank.tagged_sents(tagset='universal'))
 
-for sent in nltk_data[:2]:
-  for w in sent:
-    print(w)
+train = data[:3000]
+test = data[3000:]
+
+trainer = hmm.HiddenMarkovModelTrainer()
+model = trainer.train(train)
+
+print("HMM Accuracy:", model.evaluate(test))
+
+print(model.tag(["The","cat","runs"]))
+
+model.build(input_shape=(None,100))
+model.summary()
+
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Embedding, LSTM, Dense
+
+model = Sequential([
+    Embedding(input_dim=5000, output_dim=64, input_length=100),
+    LSTM(64, return_sequences=True),
+    Dense(12, activation='softmax')
+])
+
+model.build((None,100))
+
+model.summary()
